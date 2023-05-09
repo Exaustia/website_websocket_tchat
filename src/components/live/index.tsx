@@ -97,7 +97,7 @@ const Live = ({ streamId }: LiveProps) => {
       ]);
     }
   };
-
+console.log(window.location.hostname)
   return (
     <div className="flex w-full h-full">
       <div className="w-80">
@@ -105,7 +105,7 @@ const Live = ({ streamId }: LiveProps) => {
       </div>
       <div className="w-full">
         <iframe
-          src="https://player.twitch.tv/?channel=scoksc2&parent=localhost"
+          src={`https://player.twitch.tv/?channel=scoksc2&parent=${window.location.hostname}`}
           allowFullScreen={true}
           title="scoksc2"
           className="w-full h-[40vw] max-h-[920px]"

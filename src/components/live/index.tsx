@@ -93,7 +93,7 @@ const Live = ({ streamId }: LiveProps) => {
       );
       setMessages((prevMessages) => [
         ...prevMessages,
-        { username: "scoksc2", content: message },
+        { username: "me", content: message },
       ]);
     }
   };

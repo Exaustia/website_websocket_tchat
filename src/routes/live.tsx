@@ -5,7 +5,7 @@ const LiveRoute = () => {
   // get the name from the URL
   const { streamId } = useParams();
   if (!streamId) throw new Error("No streamId in URL");
-
+  console.log("ici");
   return <Live streamId={streamId} />;
 };
 

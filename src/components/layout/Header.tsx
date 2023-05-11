@@ -1,17 +1,30 @@
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthProvider";
 import { useUser } from "../../context/UserProvider";
+import { useEffect, useState } from "react";
 
 const Header = () => {
   const { user } = useUser();
+  const [loading, setLoading] = useState<boolean>(false); // [TODO
+  const { provider, isLoggedIn } = useAuthContext();
 
-  console.log(user)
+  useEffect(() => {
+    if (user && !isLoggedIn) {
+      setLoading(true);
+    }
+    if (user && isLoggedIn) {
+      setLoading(false);
+    }
+  }, [isLoggedIn, user]);
 
-  const { provider, isLoggedIn, status } = useAuthContext();
   let wallet = null;
   if (provider === "eth") {
     const startWallet = user?.ethWallet?.slice(0, 6);
     const endWallet = user?.ethWallet?.slice(-4);
+    wallet = `${startWallet}...${endWallet}`;
+  } else {
+    const startWallet = user?.solanaWallet?.slice(0, 6);
+    const endWallet = user?.solanaWallet?.slice(-4);
     wallet = `${startWallet}...${endWallet}`;
   }
 
@@ -20,7 +33,7 @@ const Header = () => {
       <Link to={"/"}>
         <img src="/images/JPG.png" alt="logo" className="" />
       </Link>
-      {isLoggedIn ? (
+      {isLoggedIn && !loading ? (
         <Link className="flex items-center" to={"/profile"}>
           <img
             src={

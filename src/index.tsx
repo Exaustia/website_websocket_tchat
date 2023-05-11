@@ -23,6 +23,7 @@ import LoginRoute from "./routes/login";
 import ProfileRoute from "./routes/profile";
 import { AuthProvider } from "./context/AuthProvider";
 import { UserProvider } from "./context/UserProvider";
+import { WalletProviderCustom } from "./context/WalletProvider";
 
 const router = createBrowserRouter([
   {
@@ -77,11 +78,13 @@ const root = ReactDOM.createRoot(
 root.render(
   <WagmiConfig config={wagmiConfig}>
     <RainbowKitProvider chains={chains}>
-      <AuthProvider>
-        <UserProvider>
-          <RouterProvider router={router} />{" "}
-        </UserProvider>
-      </AuthProvider>
+      <WalletProviderCustom>
+        <AuthProvider>
+          <UserProvider>
+            <RouterProvider router={router} />{" "}
+          </UserProvider>
+        </AuthProvider>
+      </WalletProviderCustom>
     </RainbowKitProvider>
   </WagmiConfig>
 );

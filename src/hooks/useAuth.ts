@@ -1,13 +1,18 @@
 // useAuth.ts
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
 import { useAccount, useDisconnect } from "wagmi";
+import naclUtils, { encodeBase64 } from "tweetnacl-util";
 import Web3 from "web3";
+import nacl from "tweetnacl";
+import { PublicKey } from "@solana/web3.js";
 
 const web3 = new Web3(Web3.givenProvider);
 
 const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { disconnect } = useDisconnect();
+  const { disconnect: disconnectSolana, signMessage } = useWallet();
   const [status, setStatus] = useState<
     "connecting" | "disconnected" | "connected"
   >("connecting"); // ["connected", "disconnected", "error", "connecting"]
@@ -51,10 +56,72 @@ const useAuth = () => {
     return () => clearInterval(interval);
   }, [token]);
 
+  const loginSolana = async (selectedAddress: string) => {
+    try {
+      if (token) return;
+      const data = await fetch("http://localhost:8080/login/nonce", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: selectedAddress,
+        }),
+      });
+
+      const { message } = await data.json();
+
+      const msg = new TextEncoder().encode(message);
+
+      if (!signMessage) return console.log("signMessage is null");
+      const signedMessage = await signMessage(msg);
+
+      // const msgString = naclUtils.encodeBase64(signedMessage);
+      const msgString = encodeBase64(signedMessage);
+      console.log(msgString);
+
+      const resultVerify = nacl.sign.detached.verify(
+        msg,
+        naclUtils.decodeBase64(msgString),
+        new PublicKey(selectedAddress).toBytes()
+      );
+
+      console.log(resultVerify);
+
+      const dataToken = await fetch("http://localhost:8080/login/solana", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          publicKey: selectedAddress,
+          signedMessage: msgString,
+        }),
+      });
+      const { accessToken, provider } = await dataToken.json();
+      if (!accessToken) return console.log("accessToken is null");
+
+      const session = {
+        provider,
+        accessToken,
+      };
+
+      setToken(accessToken);
+      setProvider(provider);
+      setIsLoggedIn(true);
+      setStatus("connected");
+      window.localStorage.setItem("jpg_fm_session", JSON.stringify(session));
+      return token;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+
   const loginETH = async (selectedAddress: string) => {
     try {
       if (token) return;
-      const data = await fetch("http://localhost:8080/login/nonce/eth", {
+      const data = await fetch("http://localhost:8080/login/nonce", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,13 +172,14 @@ const useAuth = () => {
   const logout = () => {
     localStorage.removeItem("jpg_fm_session");
     disconnect();
+    disconnectSolana();
     setToken(null);
     setProvider(null);
     setIsLoggedIn(false);
     setStatus("disconnected");
   };
 
-  return { isLoggedIn, token, provider, status, loginETH, logout };
+  return { isLoggedIn, token, provider, status, loginETH, loginSolana, logout };
 };
 
 export default useAuth;

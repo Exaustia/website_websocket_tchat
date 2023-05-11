@@ -7,6 +7,7 @@ interface IAuthState {
   provider: string | null;
   status: "connecting" | "disconnected" | "connected";
   loginETH: CallableFunction;
+  loginSolana: CallableFunction;
   logout: () => void;
 }
 

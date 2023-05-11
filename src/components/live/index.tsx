@@ -59,20 +59,7 @@ const Live = ({ streamId }: LiveProps) => {
               token: token,
             })
           );
-
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              from: "bot",
-              content: "Welcome to the chat!",
-              username: "bot",
-              provider: "eth",
-              isSub: false,
-              usernameColor: "#FF0000",
-            },
-          ]);
         }
-
         setConnected(true);
       };
     }

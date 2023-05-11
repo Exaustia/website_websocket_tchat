@@ -1,11 +1,9 @@
 // useAuth.ts
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState, useEffect } from "react";
-import { useAccount, useDisconnect } from "wagmi";
-import naclUtils, { encodeBase64 } from "tweetnacl-util";
+import { useDisconnect } from "wagmi";
+import { encodeBase64 } from "tweetnacl-util";
 import Web3 from "web3";
-import nacl from "tweetnacl";
-import { PublicKey } from "@solana/web3.js";
 
 const web3 = new Web3(Web3.givenProvider);
 
@@ -16,7 +14,7 @@ const useAuth = () => {
   const [status, setStatus] = useState<
     "connecting" | "disconnected" | "connected"
   >("connecting"); // ["connected", "disconnected", "error", "connecting"]
-  const { isDisconnected, status: statusETH } = useAccount();
+
   const [provider, setProvider] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -54,6 +52,7 @@ const useAuth = () => {
       }
     }, 600000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const loginSolana = async (selectedAddress: string) => {
@@ -75,18 +74,8 @@ const useAuth = () => {
 
       if (!signMessage) return console.log("signMessage is null");
       const signedMessage = await signMessage(msg);
-
-      // const msgString = naclUtils.encodeBase64(signedMessage);
+      
       const msgString = encodeBase64(signedMessage);
-      console.log(msgString);
-
-      const resultVerify = nacl.sign.detached.verify(
-        msg,
-        naclUtils.decodeBase64(msgString),
-        new PublicKey(selectedAddress).toBytes()
-      );
-
-      console.log(resultVerify);
 
       const dataToken = await fetch("http://localhost:8080/login/solana", {
         method: "POST",

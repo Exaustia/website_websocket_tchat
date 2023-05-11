@@ -1,4 +1,3 @@
-import { Login } from "../components/login";
 import { Profile } from "../components/profile";
 
 const ProfileRoute = () => {

@@ -2,15 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import {
-  darkTheme,
-  getDefaultWallets,
-  RainbowKitAuthenticationProvider,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
+import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
-import { alchemyProvider } from "wagmi/providers/alchemy";
+
 import { publicProvider } from "wagmi/providers/public";
 
 import "./index.css";
@@ -76,17 +71,17 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <WagmiConfig config={wagmiConfig}>
-    <RainbowKitProvider chains={chains}>
-      <WalletProviderCustom>
+  <WalletProviderCustom>
+    <WagmiConfig config={wagmiConfig}>
+      <RainbowKitProvider chains={chains}>
         <AuthProvider>
           <UserProvider>
             <RouterProvider router={router} />{" "}
           </UserProvider>
         </AuthProvider>
-      </WalletProviderCustom>
-    </RainbowKitProvider>
-  </WagmiConfig>
+      </RainbowKitProvider>
+    </WagmiConfig>
+  </WalletProviderCustom>
 );
 
 // If you want to start measuring performance in your app, pass a function

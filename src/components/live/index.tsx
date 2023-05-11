@@ -1,10 +1,7 @@
-"use client";
-import { useLoaderData } from "react-router-dom";
 import Chat from "../chat";
 import { useEffect, useRef, useState } from "react";
-import useAuth from "../../hooks/useAuth";
+
 import { useAuthContext } from "../../context/AuthProvider";
-import jwtDecode from "jwt-decode";
 import { useUser } from "../../context/UserProvider";
 import fetchAPI from "../../utils/fetch";
 
@@ -24,19 +21,9 @@ type Message = {
 const Live = ({ streamId }: LiveProps) => {
   const { isLoggedIn, token } = useAuthContext();
   const { user } = useUser();
-  const [username, setUsername] = useState<string>("Guest");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [connected, setConnected] = useState<boolean>(false);
 
   const webSocketRef = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    if (token) {
-      const jwtDecoded = jwtDecode(token || "") as { username: string };
-      console.log("jwtDecoded", jwtDecoded);
-      setUsername(jwtDecoded.username);
-    }
-  }, [token]);
 
   useEffect(() => {
     getTheLastMessageFromTheApi({ roomId: streamId }).then((res) => {
@@ -60,7 +47,7 @@ const Live = ({ streamId }: LiveProps) => {
             })
           );
         }
-        setConnected(true);
+        // setConnected(true);
       };
     }
 
@@ -110,7 +97,7 @@ const Live = ({ streamId }: LiveProps) => {
     };
 
     webSocketRef.current.onclose = () => {
-      setConnected(false);
+      // setConnected(false);
     };
 
     return () => {

@@ -12,6 +12,7 @@ import { User } from "../types/User";
 interface UserProviderState {
   user: User | null;
   isConnected: boolean;
+  refreshUser?: () => void;
 }
 
 const UserContext = createContext<UserProviderState>({
@@ -30,6 +31,14 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   });
   const { isLoggedIn } = useAuthContext();
 
+  const refreshUser = () => {
+    fetchAPI("/user/me", { method: "GET" }).then((res) => {
+      if (!res.error) {
+        setUser({ user: res, isConnected: true });
+      }
+    });
+  };
+
   useEffect(() => {
     if (!isLoggedIn) return;
     fetchAPI("/user/me", { method: "GET" }).then((res) => {
@@ -39,7 +48,14 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     });
   }, [isLoggedIn]);
 
-  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+  const context = {
+    refreshUser,
+    ...user,
+  };
+
+  return (
+    <UserContext.Provider value={context}>{children}</UserContext.Provider>
+  );
 };
 
 export const useUser = () => {

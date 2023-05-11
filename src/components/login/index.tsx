@@ -8,7 +8,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 export const Login = () => {
   const {
     isLoggedIn,
-    token,
     loginETH,
     loginSolana,
     status: authStatus,
@@ -18,7 +17,6 @@ export const Login = () => {
   const [isConnectToWallet, setIsConnectToWallet] = useState<boolean>(false); // [TODO
   const walletSolana = useWallet();
 
-  const [ethSign, setEthSign] = useState<boolean>(false);
   const [userCancelled, setUserCancelled] = useState<boolean>(false);
 
   const handleDisconnect = () => {
@@ -49,12 +47,9 @@ export const Login = () => {
       authStatus === "disconnected" &&
       !userCancelled
     ) {
-      setEthSign(true);
-      loginETH(address)
-        .catch(() => {
-          setUserCancelled(true);
-        })
-        .finally(() => setEthSign(false));
+      loginETH(address).catch(() => {
+        setUserCancelled(true);
+      });
     }
   }, [
     isConnected,

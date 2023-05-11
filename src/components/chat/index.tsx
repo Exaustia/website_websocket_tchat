@@ -65,18 +65,23 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
         {messages.map((message, index) => {
           const color = message.usernameColor;
           return (
-            <div key={index} className="flex">
-              <Link
-                to={"/profile/" + message.username}
-                className={classNames(`font-bold `)}
-                style={{ color }}
-              >
-                {message.username}:
-              </Link>
-              <span
-                className="text-white ml-1 flex break-all"
-                dangerouslySetInnerHTML={{ __html: urlify(message.content) }}
-              ></span>
+            <div
+              key={index}
+              className="leading-6 flex"
+            >
+              <div className="leading-6 text-white ml-1 break-all inline-block">
+                <Link
+                  to={"/profile/" + message.username}
+                  className={classNames(`font-bold mr-1`)}
+                  style={{ color }}
+                >
+                  {message.username}:
+                </Link>
+                <span
+                  className=""
+                  dangerouslySetInnerHTML={{ __html: urlify(message.content) }}
+                ></span>
+              </div>
             </div>
           );
         })}
@@ -136,6 +141,7 @@ export default Chat;
 
 function urlify(text: string) {
   var urlRegex = /(https?:\/\/[^\s]+)/g;
+  // or alternatively
   return text.replace(urlRegex, function (url: string) {
     return (
       '<a class="mr-1 text-blue-700 italic word-break-all" href="' +
@@ -145,6 +151,9 @@ function urlify(text: string) {
       "</a>"
     );
   });
-  // or alternatively
-  // return text.replace(urlRegex, '<a href="$1">$1</a>')
+
+  // return text.replace(
+  //   urlRegex,
+  //   '<a style={{color: "#F0F0F0}} href="$1">$1</a>'
+  // );
 }

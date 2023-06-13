@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useAuthContext } from "../../context/AuthProvider";
 import { useUser } from "../../context/UserProvider";
 import fetchAPI from "../../utils/fetch";
+import { Room } from "../../types/Room";
+import { NotFound } from "../common/NotFound";
 
 interface LiveProps {
   streamId: string;
@@ -22,16 +24,25 @@ const Live = ({ streamId }: LiveProps) => {
   const { isLoggedIn, token } = useAuthContext();
   const { user } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [roomData, setRoomData] = useState<Room>();
 
   const webSocketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    getTheLastMessageFromTheApi({ roomId: streamId }).then((res) => {
-      setMessages((prevMessages) => [...prevMessages, ...res]);
+    getRoomData(streamId).then((res) => {
+      if (!res.error) {
+        setError("res.error");
+      }
+      setRoomData(res.room);
+      getTheLastMessageFromTheApi({ roomId: res.id }).then((res) => {
+        setMessages((prevMessages) => [...prevMessages, ...res]);
+      });
     });
   }, [streamId]);
 
   useEffect(() => {
+    if (!roomData) return;
     webSocketRef.current = new WebSocket(
       "wss://7b71b72exg.execute-api.us-east-1.amazonaws.com/dev"
     );
@@ -42,7 +53,7 @@ const Live = ({ streamId }: LiveProps) => {
           webSocketRef.current.send(
             JSON.stringify({
               action: "enterRoom",
-              roomId: "e7a997dc-edd6-11ed-a05b-0242ac120003",
+              roomId: roomData?.id,
               token: token,
             })
           );
@@ -103,14 +114,14 @@ const Live = ({ streamId }: LiveProps) => {
     return () => {
       webSocketRef.current?.close();
     };
-  }, [isLoggedIn, token]);
+  }, [isLoggedIn, roomData, token]);
 
   const handleSend = (message: string) => {
     if (webSocketRef.current) {
       webSocketRef.current.send(
         JSON.stringify({
           action: "sendMessage",
-          roomId: "e7a997dc-edd6-11ed-a05b-0242ac120003",
+          roomId: roomData?.id,
           message: message,
         })
       );
@@ -127,12 +138,11 @@ const Live = ({ streamId }: LiveProps) => {
       ]);
     }
   };
+  if (error) return <NotFound />;
 
   return (
     <div className="flex w-full h-full">
-      <div className="w-14  border-b-[1px] border-r-[1px] border-[#29282E]">
-        toto
-      </div>
+      <div className="w-14  border-b-[1px] border-r-[1px] border-[#29282E]"></div>
       <div className="w-full">
         <iframe
           src={`https://player.twitch.tv/?channel=scoksc2&parent=${window.location.hostname}`}
@@ -150,4 +160,8 @@ export default Live;
 
 const getTheLastMessageFromTheApi = async ({ roomId }: { roomId: string }) => {
   return fetchAPI(`/room/${roomId}/lastMessages`);
+};
+
+const getRoomData = async (name: string) => {
+  return fetchAPI(`/room/${name}`);
 };

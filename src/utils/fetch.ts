@@ -32,14 +32,12 @@ const fetchAPI = async (url: string, options: FetchOptions = {}) => {
       body: options.body && JSON.stringify(options.body),
     };
 
+    console.log(process.env.REACT_APP_API_URL)
     // Exécution de la requête Fetch
-    const response = await fetch(
-      (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080") + url,
-      {
-        ...options.optionNext,
-        ...fetchOptions,
-      }
-    );
+    const response = await fetch(process.env.REACT_APP_API_URL + url, {
+      ...options.optionNext,
+      ...fetchOptions,
+    });
 
     const error = handleResponseErrors(response);
     if (error.error) {

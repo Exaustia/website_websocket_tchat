@@ -35,7 +35,7 @@ const useAuth = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       if (token) {
-        const data = await fetch("http://localhost:8080/login/verifySession", {
+        const data = await fetch(process.env.REACT_APP_API_URL + "/login/verifySession", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -58,7 +58,7 @@ const useAuth = () => {
   const loginSolana = async (selectedAddress: string) => {
     try {
       if (token) return;
-      const data = await fetch("http://localhost:8080/login/nonce", {
+      const data = await fetch(process.env.REACT_APP_API_URL + "/login/nonce", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,10 +74,10 @@ const useAuth = () => {
 
       if (!signMessage) return console.log("signMessage is null");
       const signedMessage = await signMessage(msg);
-      
+
       const msgString = encodeBase64(signedMessage);
 
-      const dataToken = await fetch("http://localhost:8080/login/solana", {
+      const dataToken = await fetch(process.env.REACT_APP_API_URL + "/login/solana", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +110,7 @@ const useAuth = () => {
   const loginETH = async (selectedAddress: string) => {
     try {
       if (token) return;
-      const data = await fetch("http://localhost:8080/login/nonce", {
+      const data = await fetch(process.env.REACT_APP_API_URL + "/login/nonce", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +129,7 @@ const useAuth = () => {
         .sign(msg, from, "")
         .then((res) => res);
 
-      const dataToken = await fetch("http://localhost:8080/login/eth", {
+      const dataToken = await fetch(process.env.REACT_APP_API_URL + "/login/eth", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

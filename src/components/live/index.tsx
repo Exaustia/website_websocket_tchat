@@ -31,9 +31,14 @@ const Live = ({ streamId }: LiveProps) => {
 
   useEffect(() => {
     getRoomData(streamId).then((res) => {
-      if (!res.error) {
+      if (res.error) {
         setError("res.error");
       }
+      if (!res.room) {
+        setError("res.error");
+        return;
+      }
+      console.log(res)
       setRoomData(res.room);
       getTheLastMessageFromTheApi({ roomId: res.id }).then((res) => {
         setMessages((prevMessages) => [...prevMessages, ...res]);
@@ -49,14 +54,17 @@ const Live = ({ streamId }: LiveProps) => {
 
     if (webSocketRef.current) {
       webSocketRef.current.onopen = (currentWS) => {
+        console.log('ici')
         if (webSocketRef.current) {
-          webSocketRef.current.send(
+          console.log('ici2')
+         const wsSend =  webSocketRef.current.send(
             JSON.stringify({
               action: "enterRoom",
               roomId: roomData?.id,
               token: token,
             })
           );
+          console.log(wsSend)
         }
         // setConnected(true);
       };

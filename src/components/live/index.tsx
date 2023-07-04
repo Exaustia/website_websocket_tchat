@@ -40,7 +40,7 @@ const Live = ({ streamId }: LiveProps) => {
       }
       console.log(res)
       setRoomData(res.room);
-      getTheLastMessageFromTheApi({ roomId: res.id }).then((res) => {
+      getTheLastMessageFromTheApi({ roomId: res.room.id }).then((res) => {
         setMessages((prevMessages) => [...prevMessages, ...res]);
       });
     });

@@ -1,7 +1,13 @@
 import { Profile } from "../components/profile";
+import useAuth from "../hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
 const ProfileRoute = () => {
-  // get the name from the URL
+  const { isLoggedIn, status } = useAuth();
+
+  if (!isLoggedIn && status !== "connecting") {
+    return <Navigate to="/login" />;
+  }
 
   return <Profile />;
 };

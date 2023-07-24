@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { darkTheme, getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 
@@ -19,6 +19,8 @@ import ProfileRoute from "./routes/profile";
 import { AuthProvider } from "./context/AuthProvider";
 import { UserProvider } from "./context/UserProvider";
 import { WalletProviderCustom } from "./context/WalletProvider";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const router = createBrowserRouter([
   {
@@ -43,19 +45,13 @@ const router = createBrowserRouter([
 ]);
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    ...(process.env.REACT_APP_ENABLE_TESTNETS === "true" ? [mainnet] : []),
-  ],
+  [mainnet, polygon, optimism, arbitrum, ...(process.env.REACT_APP_ENABLE_TESTNETS === "true" ? [mainnet] : [])],
   [publicProvider()]
 );
 
 const { connectors } = getDefaultWallets({
   appName: "RainbowKit demo",
-  projectId: "YOUR_PROJECT_ID",
+  projectId: "9cf0ed08b0c0539f18bcaa9d286ef710",
   chains,
 });
 
@@ -66,9 +62,7 @@ const wagmiConfig = createConfig({
   webSocketPublicClient,
 });
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
 root.render(
   <WalletProviderCustom>
@@ -77,6 +71,18 @@ root.render(
         <AuthProvider>
           <UserProvider>
             <RouterProvider router={router} />{" "}
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
           </UserProvider>
         </AuthProvider>
       </RainbowKitProvider>

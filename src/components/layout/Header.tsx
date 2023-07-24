@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 
 const Header = () => {
   const { user } = useUser();
-  const [loading, setLoading] = useState<boolean>(false); // [TODO
+  const [loading, setLoading] = useState<boolean>(false);
+  const [wallet, setWallet] = useState<string | null>(null); // [1
   const { provider, isLoggedIn } = useAuthContext();
 
   useEffect(() => {
@@ -14,19 +15,17 @@ const Header = () => {
     }
     if (user && isLoggedIn) {
       setLoading(false);
+      if (provider === "eth") {
+        const startWallet = user?.ethWallet?.slice(0, 6);
+        const endWallet = user?.ethWallet?.slice(-4);
+        setWallet(`${startWallet}...${endWallet}`);
+      } else {
+        const startWallet = user?.solanaWallet?.slice(0, 6);
+        const endWallet = user?.solanaWallet?.slice(-4);
+        setWallet(`${startWallet}...${endWallet}`);
+      }
     }
   }, [isLoggedIn, user]);
-
-  let wallet = null;
-  if (provider === "eth") {
-    const startWallet = user?.ethWallet?.slice(0, 6);
-    const endWallet = user?.ethWallet?.slice(-4);
-    wallet = `${startWallet}...${endWallet}`;
-  } else {
-    const startWallet = user?.solanaWallet?.slice(0, 6);
-    const endWallet = user?.solanaWallet?.slice(-4);
-    wallet = `${startWallet}...${endWallet}`;
-  }
 
   return (
     <nav className="h-16 px-12 bg-primary-color flex items-center justify-between shadow-header relative">
@@ -44,10 +43,8 @@ const Header = () => {
             className="w-8 h-8 rounded-full"
           />
           <div className="flex text-white flex-col ml-3">
-            <span className="font-semibold leading-[0.9]">
-              {user?.username || wallet}
-            </span>
-            <span className="text-secondary-color">{wallet}</span>
+            {user?.username && <span className="font-semibold leading-[0.9]">{user?.username}</span>}
+            {wallet && <span className="text-secondary-color">{wallet}</span>}
           </div>
         </Link>
       ) : (

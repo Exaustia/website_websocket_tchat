@@ -73,7 +73,7 @@ export const Login = () => {
         <>
           <div className="flex flex-col border border-secondary-color rounded-md bg-slate-600 w-fit p-5 justify-center items-center h-32">
             <span className="mb-4">Using Eth ?</span>
-            <ConnectButton />
+            <ConnectButton /> 
           </div>
           <div className="flex flex-col border border-secondary-color rounded-md bg-slate-600 w-fit p-5 justify-center items-center h-32">
             <span className="mb-4">Using Solana ?</span>

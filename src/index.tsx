@@ -11,7 +11,6 @@ import { publicProvider } from "wagmi/providers/public";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import Home from "./routes/Home";
 import LiveRoute from "./routes/live";
 import ErrorPage from "./routes/errorPage";
 import LoginRoute from "./routes/login";
@@ -21,16 +20,23 @@ import { UserProvider } from "./context/UserProvider";
 import { WalletProviderCustom } from "./context/WalletProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import UserRoute from "./routes/user";
+import HomePage from "./routes/Home";
+import { Home } from "./components/Home";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <HomePage />,
     errorElement: <ErrorPage />,
     children: [
       {
         path: ":streamId",
         element: <LiveRoute />,
+      },
+      {
+        path: "user/:username",
+        element: <UserRoute />,
       },
       {
         path: "login",
@@ -39,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: <ProfileRoute />,
+      },
+      {
+        path: "/",
+        element: <Home />,
       },
     ],
   },

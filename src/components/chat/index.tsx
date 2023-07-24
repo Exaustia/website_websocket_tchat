@@ -71,7 +71,7 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
             >
               <div className="leading-6 text-white ml-1 break-all inline-block">
                 <Link
-                  to={"/profile/" + message.username}
+                  to={"/user/" + message.username}
                   className={classNames(`font-bold mr-1`)}
                   style={{ color }}
                 >

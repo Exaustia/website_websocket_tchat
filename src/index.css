@@ -20,3 +20,7 @@
 ::-webkit-scrollbar-thumb:active {
   background: rgba(255, 255, 255, 0.2);
 }
+
+.text_chat {
+  overflow-wrap: anywhere;
+}

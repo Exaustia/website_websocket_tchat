@@ -1,23 +1,21 @@
 import Chat from "../chat";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 import { useAuthContext } from "../../context/AuthProvider";
 import { useUser } from "../../context/UserProvider";
 import fetchAPI from "../../utils/fetch";
 import { Room } from "../../types/Room";
 import { NotFound } from "../common/NotFound";
+import { toast } from "react-toastify";
+import { Message } from "../../types/Message";
 
 interface LiveProps {
   streamId: string;
 }
 
-type Message = {
-  username: string;
-  content: string;
-  from: "server" | "user" | "bot";
-  provider: "eth" | "solana";
-  isSub: boolean;
-  usernameColor: string;
+const MESSAGE_ACTIONS = {
+  PUBLIC: "publicMessage",
+  REMOVE: "removeMessage",
 };
 
 const Live = ({ streamId }: LiveProps) => {
@@ -38,7 +36,6 @@ const Live = ({ streamId }: LiveProps) => {
         setError("res.error");
         return;
       }
-      console.log(res)
       setRoomData(res.room);
       getTheLastMessageFromTheApi({ roomId: res.room.id }).then((res) => {
         setMessages((prevMessages) => [...prevMessages, ...res]);
@@ -46,74 +43,94 @@ const Live = ({ streamId }: LiveProps) => {
     });
   }, [streamId]);
 
-  useEffect(() => {
-    if (!roomData) return;
-    webSocketRef.current = new WebSocket(
-      "wss://7b71b72exg.execute-api.us-east-1.amazonaws.com/dev"
-    );
+  const editMessage = useCallback(
+    (id: string, newContent: string) => {
+      if (messages.length === 0) {
+        return;
+      }
 
-    if (webSocketRef.current) {
-      webSocketRef.current.onopen = (currentWS) => {
-        console.log('ici')
-        if (webSocketRef.current) {
-          console.log('ici2')
-         const wsSend =  webSocketRef.current.send(
-            JSON.stringify({
-              action: "enterRoom",
-              roomId: roomData?.id,
-              token: token,
-            })
-          );
-          console.log(wsSend)
+      const newMessages = messages.map((message) => {
+        if (message.id === id) {
+          return {
+            ...message,
+            content: newContent,
+            isModerated: true,
+          };
         }
-        // setConnected(true);
-      };
-    }
+        return {
+          ...message,
+          content: message.isModerated ? newContent : message.content,
+        };
+      });
 
+      setMessages(newMessages);
+    },
+    [messages]
+  );
+
+  useEffect(() => {
+    if (!webSocketRef.current) return;
     webSocketRef.current.onmessage = (event) => {
       const { data } = event;
 
-      const {
-        action,
-        message,
-        from,
-        username,
-        isSub,
-        provider,
-        usernameColor,
-      } = data
+      const { action, message, from, username, isSub, provider, usernameColor, id, isModerated } = data
         ? JSON.parse(data)
         : {
             action: "",
             message: "",
             from: "",
             username: "",
+            isModerated: false,
             isSub: false,
             provider: "",
             usernameColor: "",
+            id: "",
           };
 
       switch (action) {
         case MESSAGE_ACTIONS.PUBLIC:
+          console.log("public");
           const entry: Message = {
+            id,
             username,
             content: message,
             from,
             provider,
             isSub,
+            isModerated,
             usernameColor,
           };
           setMessages((prevMessages) => [...prevMessages, entry]);
           break;
-
+        case MESSAGE_ACTIONS.REMOVE:
+          console.log("Remove");
+          editMessage(id, "Message supprimé par un modérateur");
+          break;
         default:
           break;
       }
     };
+  }, [editMessage, messages]);
 
-    const MESSAGE_ACTIONS = {
-      PUBLIC: "publicMessage",
-    };
+  useEffect(() => {
+    if (!roomData) return;
+    webSocketRef.current = new WebSocket("wss://7b71b72exg.execute-api.us-east-1.amazonaws.com/dev");
+
+    console.log(webSocketRef);
+    if (webSocketRef.current) {
+      webSocketRef.current.onopen = (currentWS) => {
+        if (webSocketRef.current) {
+          const wsSend = webSocketRef.current.send(
+            JSON.stringify({
+              action: "enterRoom",
+              roomId: roomData?.id,
+              token: token,
+            })
+          );
+          console.log(wsSend);
+        }
+      };
+    }
 
     webSocketRef.current.onclose = () => {
       // setConnected(false);
@@ -122,7 +139,7 @@ const Live = ({ streamId }: LiveProps) => {
     return () => {
       webSocketRef.current?.close();
     };
-  }, [isLoggedIn, roomData, token]);
+  }, [isLoggedIn, token, roomData?.id]);
 
   const handleSend = (message: string) => {
     if (webSocketRef.current) {
@@ -133,17 +150,18 @@ const Live = ({ streamId }: LiveProps) => {
           message: message,
         })
       );
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          username: user?.username || "Guest",
-          content: message,
-          from: "user",
-          provider: "eth",
-          isSub: false,
-          usernameColor: user?.color || "#FF0000",
-        },
-      ]);
+      // setMessages((prevMessages) => [
+      //   ...prevMessages,
+      //   {
+      //     username: user?.username || "Guest",
+      //     content: message,
+      //     from: "user",
+      //     provider: "eth",
+      //     isSub: false,
+      //     id: "",
+      //     usernameColor: user?.color || "#FF0000",
+      //   },
+      // ]);
     }
   };
   if (error) return <NotFound />;

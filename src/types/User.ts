@@ -11,5 +11,8 @@ export type User = {
   picture: string | null;
   createdAt: Date;
   updatedAt: Date;
+  isModerator: boolean;
+  isBanned: boolean;
+  isMuted: boolean;
   color: string;
 };

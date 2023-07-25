@@ -20,9 +20,9 @@ const MESSAGE_ACTIONS = {
 
 const Live = ({ streamId }: LiveProps) => {
   const { isLoggedIn, token } = useAuthContext();
-  const { user } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
   const [roomData, setRoomData] = useState<Room>();
 
   const webSocketRef = useRef<WebSocket | null>(null);
@@ -112,34 +112,64 @@ const Live = ({ streamId }: LiveProps) => {
     };
   }, [editMessage, messages]);
 
+  const keepAlive = useCallback(() => {
+    if (!webSocketRef.current) return;
+    console.log("keep alive");
+    webSocketRef.current.send(
+      JSON.stringify({
+        action: "keepAlive",
+      })
+    );
+  }, []);
+
   useEffect(() => {
-    if (!roomData) return;
-    webSocketRef.current = new WebSocket("wss://7b71b72exg.execute-api.us-east-1.amazonaws.com/dev");
-
-    console.log(webSocketRef);
-    if (webSocketRef.current) {
-      webSocketRef.current.onopen = (currentWS) => {
-        if (webSocketRef.current) {
-          const wsSend = webSocketRef.current.send(
-            JSON.stringify({
-              action: "enterRoom",
-              roomId: roomData?.id,
-              token: token,
-            })
-          );
-          console.log(wsSend);
-        }
-      };
-    }
-
-    webSocketRef.current.onclose = () => {
-      // setConnected(false);
+    const sendHeartbeat = () => {
+      if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
+        console.log("heartbeat")
+        webSocketRef.current.send("heartbeat");
+      }
     };
+
+    const heartbeatInterval = setInterval(sendHeartbeat, 5000);
 
     return () => {
-      webSocketRef.current?.close();
+      clearInterval(heartbeatInterval);
     };
-  }, [isLoggedIn, token, roomData?.id]);
+  }, []);
+
+  useEffect(() => {
+    if (!roomData || connected) return;
+    webSocketRef.current = new WebSocket("wss://7b71b72exg.execute-api.us-east-1.amazonaws.com/dev");
+    webSocketRef.current.onopen = () => {
+      if (webSocketRef.current) {
+        setConnected(true);
+        webSocketRef.current.send(
+          JSON.stringify({
+            action: "enterRoom",
+            roomId: roomData?.id,
+            token: token,
+          })
+        );
+
+        webSocketRef.current.onclose = () => {
+          toast.error("La connexion au chat a été perdue, nous essayons de la rétablir");
+          console.log("try to reconnect");
+          if (webSocketRef.current?.CLOSED) {
+            setTimeout(() => {
+              webSocketRef.current = new WebSocket("wss://7b71b72exg.execute-api.us-east-1.amazonaws.com/dev");
+              webSocketRef.current.send(
+                JSON.stringify({
+                  action: "enterRoom",
+                  roomId: roomData?.id,
+                  token: token,
+                })
+              );
+            }, 5000);
+          }
+        };
+      }
+    };
+  }, [isLoggedIn, token, roomData, connected]);
 
   const handleSend = (message: string) => {
     if (webSocketRef.current) {

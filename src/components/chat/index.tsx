@@ -94,12 +94,14 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
                 "flex py-1 relative makeChildHover"
               )}
             >
-              <button
-                onClick={() => (index === panelOpen ? setPanelOpen(null) : setPanelOpen(index))}
-                className="absolute right-0 top-0 hidden-child h-full bg-slate-50 flex justify-center items-center p-1 rounded-md"
-              >
-                Manage
-              </button>
+              {user?.isModerator && (
+                <button
+                  onClick={() => (index === panelOpen ? setPanelOpen(null) : setPanelOpen(index))}
+                  className="absolute right-0 top-0 hidden-child h-full bg-slate-50 flex justify-center items-center p-1 rounded-md"
+                >
+                  Manage
+                </button>
+              )}
               {user?.isModerator && index === panelOpen && (
                 <div className="absolute z-50 top-10 -left-4 w-[calc(100%+2rem)]">
                   <Moderate message={message} handleClose={() => setPanelOpen(null)} />

@@ -27,11 +27,10 @@ export const UserProfil = ({ user, handleClose }: { user: User; handleClose: () 
           <img
             src={user?.picture || "https://i.imgur.com/0LKZQYM.png"}
             alt="profile"
-            className="w-22 h-22 rounded-full"
+            className=" h-20 w-20 rounded-full"
           />
           <div className="ml-4">
             <h1 className="text-2xl font-bold mt-1">{user?.username}</h1>
-            <p className="text-lg mt-2">{user?.description}</p>
             <div className="mt-1">
               <div className="flex flex-row mt-2">
                 Twitter:

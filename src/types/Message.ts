@@ -7,4 +7,5 @@ export type Message = {
   usernameColor: string;
   id: string;
   isModerated: boolean;
+  userId: string;
 };

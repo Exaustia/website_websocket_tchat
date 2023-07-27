@@ -24,3 +24,10 @@
 .text_chat {
   overflow-wrap: anywhere;
 }
+
+.hidden-child {
+  visibility: hidden;
+}
+.makeChildHover:hover .hidden-child {
+  visibility: visible;
+}

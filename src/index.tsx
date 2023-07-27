@@ -35,10 +35,6 @@ const router = createBrowserRouter([
         element: <LiveRoute />,
       },
       {
-        path: "user/:username",
-        element: <UserRoute />,
-      },
-      {
         path: "login",
         element: <LoginRoute />,
       },

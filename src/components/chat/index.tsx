@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 import { useUser } from "../../context/UserProvider";
 import { Moderate } from "./Moderate";
 import { Message } from "../../types/Message";
+import { getUserByUsername } from "../../API/user";
+import { User } from "../../types/User";
+import { toast } from "react-toastify";
+import { UserProfil } from "../user";
 
 interface ChatProps {
   messages: Message[];
@@ -16,9 +20,15 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
   const { user } = useUser();
   const [message, setMessage] = useState<string>("");
   const [panelOpen, setPanelOpen] = useState<number | null>();
+  const [panelUserOpen, setPanelUserOpen] = useState<number | null>();
+  const [userToCheck, setUserToCheck] = useState<User>();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const handleCallSend = () => {
+    if (user?.isBanned) {
+      toast.error("You are banned, you can't send message");
+      return;
+    }
     if (message === "") return;
     handleSend(message);
     setMessage("");
@@ -48,8 +58,27 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
     }
   };
 
+  const handleOpenUserPanel = (username: string, index: number) => {
+    getUserByUsername(username).then((res) => {
+      if (res.error) {
+        toast.error(res.error);
+      }
+      if (!res) {
+        return;
+      }
+      setUserToCheck(res.data);
+      setPanelUserOpen(index);
+    });
+    setPanelUserOpen(index);
+  };
+
+  const handleCloseUserPanel = () => {
+    setPanelUserOpen(null);
+    setPanelUserOpen(null);
+  };
+
   return (
-    <section className="h-[calc(100vh-65px)] w-[27rem] flex flex-col border-l-[1px] border-[#29282E]">
+    <section className="h-full overflow-hidden lg:h-[calc(100vh-65px)] lg:max-w-[360px] min-w-[360px] flex flex-col border-l-[1px] border-[#29282E]">
       <div className="flex justify-center items-center py-4 border-b-[1px] border-[#29282E]">
         <h1 className="text-white text-lg font-bold">Stream chat</h1>
       </div>
@@ -60,26 +89,36 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
               key={index}
               className={classNames(
                 {
-                  "hover:bg-slate-100": user?.isModerator,
+                  "hover:bg-slate-600 rounded-lg": user?.isModerator,
                 },
-                "flex py-1 relative"
+                "flex py-1 relative makeChildHover"
               )}
-              onClick={() => (index === panelOpen ? setPanelOpen(null) : setPanelOpen(index))}
             >
+              <button
+                onClick={() => (index === panelOpen ? setPanelOpen(null) : setPanelOpen(index))}
+                className="absolute right-0 top-0 hidden-child h-full bg-slate-50 flex justify-center items-center p-1 rounded-md"
+              >
+                Manage
+              </button>
               {user?.isModerator && index === panelOpen && (
-                <div className="absolute z-50 right-0">
-                  <Moderate messageId={message.id} />
+                <div className="absolute z-50 top-10 -left-4 w-[calc(100%+2rem)]">
+                  <Moderate message={message} handleClose={() => setPanelOpen(null)} />
+                </div>
+              )}
+              {userToCheck && index === panelUserOpen && (
+                <div className="absolute z-50 -left-4 w-[calc(100%+2rem)]">
+                  <UserProfil user={userToCheck} handleClose={handleCloseUserPanel} />
                 </div>
               )}
               <div className="leading-6 text-white ml-1 inline-block">
                 {message.from === "user" && (
                   <>
-                    <Link
-                      to={"/user/" + message.username}
+                    <span
                       className={classNames(
-                        `font-bold hover:bg-gray-200 hover:opacity-50 hover:rounded-md items-center`
+                        `font-bold hover:bg-gray-200 hover:opacity-50 hover:rounded-md items-center cursor-pointer`
                       )}
                       style={{ color: message.usernameColor }}
+                      onClick={() => handleOpenUserPanel(message.username, index)}
                     >
                       <img
                         src={`/images/chat/${message.provider === "eth" ? "eth" : "sol"}_ico.png`}
@@ -87,7 +126,7 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
                         className="w-5 h-5 inline-block mr-1 mb-1"
                       />
                       {message.username}
-                    </Link>
+                    </span>
 
                     <span aria-hidden="true">: </span>
                   </>
@@ -120,12 +159,12 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
             }}
             onChange={(e) => isLoggedIn && setMessage(e.target.value)}
             value={message}
-            disabled={!isLoggedIn}
+            disabled={!isLoggedIn || user?.isBanned}
             maxLength={256}
             placeholder={isLoggedIn ? "Type your message here" : "Login to chat"}
             className={classNames(
               {
-                "cursor-not-allowed outline-none ": !isLoggedIn,
+                "cursor-not-allowed outline-none ": !isLoggedIn || user?.isBanned,
               },
               "w-[90%] h-7  bg-primary-color focus:outline-none focus:border-none"
             )}

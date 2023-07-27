@@ -5,8 +5,6 @@ const UserRoute = () => {
   // get the name from the URL
   const { username } = useParams();
   if (!username) throw new Error("No streamId in URL");
-
-  return <UserProfil username={username} />;
 };
 
 export default UserRoute;

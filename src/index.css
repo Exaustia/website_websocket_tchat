@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --num {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -30,4 +36,11 @@
 }
 .makeChildHover:hover .hidden-child {
   visibility: visible;
+}
+
+.nbUsers {
+  transition: --num 5s;
+  counter-set: num var(--num);
+  counter-increment: num;
+  content: attr(data-after);
 }

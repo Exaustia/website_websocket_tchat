@@ -8,6 +8,7 @@ import { Room } from "../../types/Room";
 import { NotFound } from "../common/NotFound";
 import { toast } from "react-toastify";
 import { Message } from "../../types/Message";
+import { NbUser } from "./NbUser";
 
 interface LiveProps {
   streamId: string;
@@ -226,6 +227,7 @@ const Live = ({ streamId }: LiveProps) => {
             title="scoksc2"
             className="w-full h-[40vw] max-h-[920px]"
           />
+          {roomData?.id && <NbUser roomId={roomData?.id} />}
         </div>
         <Chat handleSend={handleSend} messages={messages} />
       </div>

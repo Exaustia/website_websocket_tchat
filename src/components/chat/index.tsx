@@ -74,8 +74,9 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
 
   const handleCloseUserPanel = () => {
     setPanelUserOpen(null);
-    setPanelUserOpen(null);
+    setUserToCheck(undefined);
   };
+  
 
   return (
     <section className="h-full overflow-hidden lg:h-[calc(100vh-65px)] lg:max-w-[360px] min-w-[360px] flex flex-col border-l-[1px] border-[#29282E]">
@@ -163,7 +164,7 @@ const Chat = ({ handleSend, messages }: ChatProps) => {
             value={message}
             disabled={!isLoggedIn || user?.isBanned}
             maxLength={256}
-            placeholder={isLoggedIn ? "Type your message here" : "Login to chat"}
+            placeholder={user?.isBanned ? "You are banned" : isLoggedIn ? "Type your message here" : "Login to chat"}
             className={classNames(
               {
                 "cursor-not-allowed outline-none ": !isLoggedIn || user?.isBanned,

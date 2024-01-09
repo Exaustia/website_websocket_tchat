@@ -219,6 +219,12 @@
   border-radius: 12px;
   padding: 4px;
   border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+}
+
+.social_item:hover {
+  cursor: pointer;
+  transform: scale(1.05);
 }
 
 .social_item_x {

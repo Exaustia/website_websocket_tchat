@@ -21,8 +21,8 @@ import { WalletProviderCustom } from "./context/WalletProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import UserRoute from "./routes/user";
-import HomePage from "./routes/Home";
-import { Home } from "./components/Home";
+import HomePage from "./routes/home";
+import { Home } from "./components/home";
 
 const router = createBrowserRouter([
   {
